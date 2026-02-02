@@ -45,12 +45,12 @@ pihole:
           - pihole.homelab.local
 
   # Persistent storage
-  persistentVolumeClaim:
-    enabled: true
-    storageClass: standard
-    accessModes:
-      - ReadWriteOnce
-    size: 5Gi
+  #persistentVolumeClaim:
+  #  enabled: true
+  #  storageClass: standard
+  #  accessModes:
+  #    - ReadWriteOnce
+  #  size: 5Gi
 
   # Resource limits
   resources:
