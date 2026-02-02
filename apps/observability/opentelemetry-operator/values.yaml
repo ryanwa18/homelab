@@ -1,0 +1,36 @@
+opentelemetry-operator:
+  # Manager configuration
+  manager:
+    # Collector image configuration
+    collectorImage:
+      repository: otel/opentelemetry-collector-k8s
+      tag: ""  # Uses default from chart
+
+    # Resource limits for operator
+    resources:
+      limits:
+        cpu: 500m
+        memory: 512Mi
+      requests:
+        cpu: 100m
+        memory: 128Mi
+
+  # Enable admission webhooks for auto-instrumentation
+  admissionWebhooks:
+    create: true
+    certManager:
+      enabled: false
+    autoGenerateCert:
+      enabled: true
+
+  # RBAC configuration
+  rbac:
+    create: true
+
+  # Service account
+  serviceAccount:
+    create: true
+
+  # Enable CRDs
+  crds:
+    create: true

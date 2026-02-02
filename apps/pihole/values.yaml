@@ -1,0 +1,92 @@
+pihole:
+  # Admin password for web UI (CHANGE THIS!)
+  adminPassword: changeme
+
+  # DNS configuration
+  DNS1: "8.8.8.8"
+  DNS2: "8.8.4.4"
+
+  # Timezone
+  timezone: "America/New_York"
+
+  # Service configuration for web UI
+  serviceWeb:
+    type: ClusterIP
+    http:
+      enabled: true
+      port: 80
+    https:
+      enabled: false
+    annotations:
+      prometheus.io/scrape: "true"
+      prometheus.io/port: "80"
+      prometheus.io/path: "/admin/api.php?summaryRaw"
+
+  # Service configuration for DNS
+  serviceDns:
+    type: LoadBalancer
+    port: 53
+    annotations: {}
+    # Optionally set a specific LoadBalancer IP
+    # loadBalancerIP: "192.168.1.100"
+
+  # Ingress for web UI
+  ingress:
+    enabled: true
+    ingressClassName: nginx
+    hosts:
+      - pihole.homelab.local
+    path: /
+    annotations:
+      cert-manager.io/cluster-issuer: letsencrypt-prod
+      nginx.ingress.kubernetes.io/ssl-redirect: "true"
+      nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+      nginx.ingress.kubernetes.io/rewrite-target: /admin
+    tls:
+      - secretName: pihole-tls
+        hosts:
+          - pihole.homelab.local
+
+  # Persistent storage
+  persistentVolumeClaim:
+    enabled: true
+    storageClass: standard
+    accessModes:
+      - ReadWriteOnce
+    size: 5Gi
+
+  # Resource limits
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+
+  # Anti-affinity (optional, for high availability)
+  affinity: {}
+
+  # Monitoring configuration
+  monitoring:
+    podMonitor:
+      enabled: false
+    sidecar:
+      enabled: false
+
+  # DNS configuration
+  dnsmasq:
+    customDnsEntries:
+      # Add custom DNS entries here
+      # - address=/homelab.local/192.168.1.100
+    customCnameEntries: []
+
+  # Whitelist/Blacklist
+  whitelist: []
+  blacklist: []
+  regex: []
+
+  # Adlists (additional ad-blocking lists)
+  adlists:
+    - https://raw.githubusercontent.com/StevenBlack/hosts/master/hosts
+    - https://mirror1.malwaredomains.com/files/justdomains

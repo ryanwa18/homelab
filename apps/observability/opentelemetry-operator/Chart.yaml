@@ -1,0 +1,8 @@
+apiVersion: v2
+name: opentelemetry-operator
+version: 1.0.0
+description: OpenTelemetry Operator for homelab observability
+dependencies:
+  - name: opentelemetry-operator
+    version: "0.73.1"
+    repository: https://open-telemetry.github.io/opentelemetry-helm-charts

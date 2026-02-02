@@ -1,0 +1,21 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: pihole
+  namespace: monitoring
+  labels:
+    prometheus: kube-prometheus
+    app: pihole
+spec:
+  selector:
+    matchLabels:
+      app: pihole
+      release: pihole
+  namespaceSelector:
+    matchNames:
+      - pihole
+  endpoints:
+    - port: http
+      path: /admin/api.php?summaryRaw
+      interval: 30s
+      scrapeTimeout: 10s

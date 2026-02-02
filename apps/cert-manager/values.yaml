@@ -1,0 +1,50 @@
+cert-manager:
+  # Install CRDs
+  installCRDs: true
+
+  # Resource limits
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+
+  # Webhook configuration
+  webhook:
+    resources:
+      requests:
+        cpu: 50m
+        memory: 64Mi
+      limits:
+        cpu: 200m
+        memory: 128Mi
+
+  # CA Injector configuration
+  cainjector:
+    resources:
+      requests:
+        cpu: 50m
+        memory: 64Mi
+      limits:
+        cpu: 200m
+        memory: 128Mi
+
+  # Enable Prometheus metrics
+  prometheus:
+    enabled: true
+    servicemonitor:
+      enabled: true
+      prometheusInstance: default
+      targetPort: 9402
+      path: /metrics
+      interval: 60s
+      scrapeTimeout: 30s
+      labels:
+        prometheus: kube-prometheus
+
+  # Global configuration
+  global:
+    leaderElection:
+      namespace: cert-manager

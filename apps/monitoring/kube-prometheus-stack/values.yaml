@@ -1,0 +1,129 @@
+kube-prometheus-stack:
+  # Prometheus configuration
+  prometheus:
+    prometheusSpec:
+      # Data retention period
+      retention: 30d
+
+      # Persistent storage for Prometheus
+      storageSpec:
+        volumeClaimTemplate:
+          spec:
+            storageClassName: standard
+            accessModes: ["ReadWriteOnce"]
+            resources:
+              requests:
+                storage: 50Gi
+
+      # Enable automatic discovery of ServiceMonitors
+      serviceMonitorSelector:
+        matchLabels:
+          prometheus: kube-prometheus
+
+      # Allow ServiceMonitors from all namespaces
+      serviceMonitorNamespaceSelector: {}
+
+      # Resource limits
+      resources:
+        requests:
+          cpu: 500m
+          memory: 2Gi
+        limits:
+          cpu: 2000m
+          memory: 4Gi
+
+      # Enable remote write (for OpenTelemetry integration)
+      enableRemoteWriteReceiver: true
+
+  # Grafana configuration
+  grafana:
+    enabled: true
+
+    # Admin credentials (CHANGE THESE!)
+    adminUser: admin
+    adminPassword: changeme
+
+    # Persistent storage for Grafana
+    persistence:
+      enabled: true
+      storageClassName: standard
+      size: 10Gi
+      accessModes:
+        - ReadWriteOnce
+
+    # Ingress configuration
+    ingress:
+      enabled: true
+      ingressClassName: nginx
+      hosts:
+        - grafana.homelab.local
+      annotations:
+        cert-manager.io/cluster-issuer: letsencrypt-prod
+        nginx.ingress.kubernetes.io/ssl-redirect: "true"
+        nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+      tls:
+        - secretName: grafana-tls
+          hosts:
+            - grafana.homelab.local
+
+    # Pre-configure Prometheus datasource
+    datasources:
+      datasources.yaml:
+        apiVersion: 1
+        datasources:
+          - name: Prometheus
+            type: prometheus
+            url: http://kube-prometheus-stack-prometheus.monitoring.svc:9090
+            isDefault: true
+            access: proxy
+            jsonData:
+              timeInterval: 30s
+
+    # Resource limits
+    resources:
+      requests:
+        cpu: 100m
+        memory: 256Mi
+      limits:
+        cpu: 500m
+        memory: 512Mi
+
+  # Alertmanager configuration
+  alertmanager:
+    alertmanagerSpec:
+      storage:
+        volumeClaimTemplate:
+          spec:
+            storageClassName: standard
+            accessModes: ["ReadWriteOnce"]
+            resources:
+              requests:
+                storage: 5Gi
+
+  # Disable components not needed in homelab
+  kubeEtcd:
+    enabled: false
+
+  kubeControllerManager:
+    enabled: false
+
+  kubeScheduler:
+    enabled: false
+
+  # Node exporter - collect metrics from nodes
+  nodeExporter:
+    enabled: true
+
+  # Kube-state-metrics - collect Kubernetes object metrics
+  kubeStateMetrics:
+    enabled: true
+
+  # Prometheus Operator configuration
+  prometheusOperator:
+    resources:
+      requests:
+        cpu: 100m
+        memory: 128Mi
+      limits:
+        cpu: 500m
+        memory: 512Mi

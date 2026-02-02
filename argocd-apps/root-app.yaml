@@ -1,0 +1,38 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: root-app
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+
+  # Source - the Git repository containing application manifests
+  source:
+    repoURL: https://github.com/ryanwa18/metropi.git
+    targetRevision: HEAD
+    path: argocd-apps
+    directory:
+      recurse: true
+      jsonnet: {}
+
+  # Destination - the Kubernetes cluster
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: argocd
+
+  # Sync policy - automated GitOps
+  syncPolicy:
+    automated:
+      prune: true       # Automatically delete resources removed from git
+      selfHeal: true    # Automatically sync when cluster state differs from git
+      allowEmpty: false # Don't sync if target path is empty
+    syncOptions:
+      - CreateNamespace=true
+    retry:
+      limit: 5
+      backoff:
+        duration: 5s
+        factor: 2
+        maxDuration: 3m

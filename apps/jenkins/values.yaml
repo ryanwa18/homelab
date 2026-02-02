@@ -1,0 +1,96 @@
+jenkins:
+  controller:
+    # Jenkins admin credentials (CHANGE THESE!)
+    adminUser: admin
+    adminPassword: changeme
+
+    # Jenkins configuration
+    jenkinsUrl: "https://jenkins.homelab.local"
+    jenkinsUriPrefix: "/"
+
+    # Resource limits
+    resources:
+      requests:
+        cpu: 500m
+        memory: 2Gi
+      limits:
+        cpu: 2000m
+        memory: 4Gi
+
+    # JVM options
+    javaOpts: "-Xms2g -Xmx2g"
+
+    # Ingress configuration
+    ingress:
+      enabled: true
+      ingressClassName: nginx
+      hostName: jenkins.homelab.local
+      annotations:
+        cert-manager.io/cluster-issuer: letsencrypt-prod
+        nginx.ingress.kubernetes.io/ssl-redirect: "true"
+        nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+        nginx.ingress.kubernetes.io/proxy-body-size: "50m"
+        nginx.ingress.kubernetes.io/proxy-request-buffering: "off"
+      tls:
+        - secretName: jenkins-tls
+          hosts:
+            - jenkins.homelab.local
+
+    # Jenkins Configuration as Code (JCasC)
+    JCasC:
+      enabled: true
+      defaultConfig: true
+      configScripts:
+        welcome-message: |
+          jenkins:
+            systemMessage: "Welcome to Jenkins - Managed by ArgoCD GitOps!"
+          unclassified:
+            location:
+              url: "https://jenkins.homelab.local"
+
+    # Install recommended plugins
+    installPlugins:
+      - kubernetes:4339.v2b_8579402577
+      - workflow-aggregator:600.vb_57cdd26fdd7
+      - git:5.7.0
+      - configuration-as-code:1894.v2a_8d5a_c3be2b
+      - prometheus:787.v14b_5dd41a_1f5
+      - github:1.41.1
+      - docker-workflow:580.vc0c340686b_54
+      - blueocean:1.27.15
+
+    # Additional plugins for Kubernetes integration
+    additionalPlugins:
+      - prometheus:787.v14b_5dd41a_1f5
+
+  # Persistent storage for Jenkins home
+  persistence:
+    enabled: true
+    storageClass: standard
+    size: 50Gi
+    accessMode: ReadWriteOnce
+
+  # Service account
+  serviceAccount:
+    create: true
+    name: jenkins
+
+  # Enable RBAC
+  rbac:
+    create: true
+    readSecrets: true
+
+  # Agent configuration (for Kubernetes-based build agents)
+  agent:
+    enabled: true
+    resources:
+      requests:
+        cpu: 500m
+        memory: 512Mi
+      limits:
+        cpu: 1000m
+        memory: 1Gi
+
+  # Backup configuration (optional)
+  backup:
+    enabled: false

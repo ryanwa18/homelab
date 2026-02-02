@@ -1,0 +1,122 @@
+apiVersion: opentelemetry.io/v1beta1
+kind: OpenTelemetryCollector
+metadata:
+  name: otel-collector
+  namespace: observability
+spec:
+  mode: deployment
+  replicas: 1
+
+  # Collector configuration
+  config:
+    # Receivers - how telemetry data is received
+    receivers:
+      # OTLP receiver for receiving traces, metrics, and logs
+      otlp:
+        protocols:
+          grpc:
+            endpoint: 0.0.0.0:4317
+          http:
+            endpoint: 0.0.0.0:4318
+
+      # Prometheus receiver for scraping metrics
+      prometheus:
+        config:
+          scrape_configs:
+            - job_name: 'otel-collector'
+              scrape_interval: 30s
+              static_configs:
+                - targets: ['localhost:8888']
+
+    # Processors - how telemetry data is processed
+    processors:
+      # Batch processor - batches telemetry data before export
+      batch:
+        timeout: 10s
+        send_batch_size: 1024
+
+      # Memory limiter - prevents OOM
+      memory_limiter:
+        check_interval: 1s
+        limit_mib: 512
+        spike_limit_mib: 128
+
+      # Resource processor - adds resource attributes
+      resource:
+        attributes:
+          - key: cluster
+            value: homelab
+            action: upsert
+
+    # Exporters - where telemetry data is sent
+    exporters:
+      # Export metrics to Prometheus via remote write
+      prometheusremotewrite:
+        endpoint: http://kube-prometheus-stack-prometheus.monitoring.svc:9090/api/v1/write
+        tls:
+          insecure: true
+        resource_to_telemetry_conversion:
+          enabled: true
+
+      # Debug/logging exporter for troubleshooting
+      logging:
+        loglevel: info
+        sampling_initial: 5
+        sampling_thereafter: 200
+
+    # Service - defines pipelines
+    service:
+      # Telemetry for the collector itself
+      telemetry:
+        logs:
+          level: info
+        metrics:
+          address: :8888
+
+      # Pipelines define the flow: receiver -> processor -> exporter
+      pipelines:
+        # Metrics pipeline
+        metrics:
+          receivers: [otlp, prometheus]
+          processors: [memory_limiter, resource, batch]
+          exporters: [prometheusremotewrite, logging]
+
+        # Traces pipeline (optional, for future use)
+        traces:
+          receivers: [otlp]
+          processors: [memory_limiter, resource, batch]
+          exporters: [logging]
+
+        # Logs pipeline (optional, for future use)
+        logs:
+          receivers: [otlp]
+          processors: [memory_limiter, resource, batch]
+          exporters: [logging]
+
+  # Resource limits for collector pods
+  resources:
+    requests:
+      cpu: 200m
+      memory: 256Mi
+    limits:
+      cpu: 1000m
+      memory: 512Mi
+
+  # Ports exposed by the collector
+  ports:
+    - name: otlp-grpc
+      port: 4317
+      targetPort: 4317
+      protocol: TCP
+    - name: otlp-http
+      port: 4318
+      targetPort: 4318
+      protocol: TCP
+    - name: metrics
+      port: 8888
+      targetPort: 8888
+      protocol: TCP
+
+  # Service configuration
+  service:
+    type: ClusterIP
