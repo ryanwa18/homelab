@@ -23,14 +23,10 @@ jenkins:
     # Ingress configuration
     ingress:
       enabled: true
-      ingressClassName: nginx
+      ingressClassName: traefik
       hostName: jenkins.homelab.local
       annotations:
         cert-manager.io/cluster-issuer: letsencrypt-prod
-        nginx.ingress.kubernetes.io/ssl-redirect: "true"
-        nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
-        nginx.ingress.kubernetes.io/proxy-body-size: "50m"
-        nginx.ingress.kubernetes.io/proxy-request-buffering: "off"
       tls:
         - secretName: jenkins-tls
           hosts:

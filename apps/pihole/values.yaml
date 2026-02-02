@@ -33,15 +33,12 @@ pihole:
   # Ingress for web UI
   ingress:
     enabled: true
-    ingressClassName: nginx
+    ingressClassName: traefik
     hosts:
       - pihole.homelab.local
-    path: /
+    path: /admin
     annotations:
       cert-manager.io/cluster-issuer: letsencrypt-prod
-      nginx.ingress.kubernetes.io/ssl-redirect: "true"
-      nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
-      nginx.ingress.kubernetes.io/rewrite-target: /admin
     tls:
       - secretName: pihole-tls
         hosts:
