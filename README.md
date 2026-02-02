@@ -86,8 +86,8 @@ Before deploying, ensure you have:
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/ryanwa18/metropi.git
-cd metropi/homelab
+git clone https://github.com/ryanwa18/homelab.git
+cd homelab
 ```
 
 ### 2. Configure cert-manager Email
@@ -108,8 +108,7 @@ This email will receive notifications about certificate expiration and renewal i
 
 ```bash
 # Install ArgoCD
-kubectl apply -f bootstrap/argocd/namespace.yaml
-kubectl apply -f bootstrap/argocd/install.yaml
+kubectl apply -k bootstrap/argocd/
 
 # Wait for ArgoCD to be ready
 kubectl wait --for=condition=available --timeout=600s deployment/argocd-server -n argocd
