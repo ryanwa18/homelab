@@ -10,7 +10,7 @@ spec:
 
   # Source - the Git repository containing application manifests
   source:
-    repoURL: https://github.com/ryanwa18/metropi.git
+    repoURL: https://github.com/ryanwa18/homelab.git
     targetRevision: HEAD
     path: argocd-apps
     directory:

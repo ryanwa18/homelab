@@ -11,7 +11,7 @@ spec:
   project: default
 
   source:
-    repoURL: https://github.com/ryanwa18/metropi.git
+    repoURL: https://github.com/ryanwa18/homelab.git
     targetRevision: HEAD
     path: apps/pihole
     helm:
