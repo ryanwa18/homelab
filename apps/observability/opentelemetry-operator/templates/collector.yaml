@@ -58,6 +58,12 @@ spec:
         resource_to_telemetry_conversion:
           enabled: true
 
+      # Export traces to Tempo via OTLP
+      otlp/tempo:
+        endpoint: tempo.observability.svc:4317
+        tls:
+          insecure: true
+
       # Debug/logging exporter for troubleshooting
       logging:
         loglevel: info
@@ -81,11 +87,11 @@ spec:
           processors: [memory_limiter, resource, batch]
           exporters: [prometheusremotewrite, logging]
 
-        # Traces pipeline (optional, for future use)
+        # Traces pipeline - forward to Tempo
         traces:
           receivers: [otlp]
           processors: [memory_limiter, resource, batch]
-          exporters: [logging]
+          exporters: [otlp/tempo, logging]
 
         # Logs pipeline (optional, for future use)
         logs:
