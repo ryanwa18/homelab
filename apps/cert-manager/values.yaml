@@ -31,18 +31,11 @@ cert-manager:
         cpu: 200m
         memory: 128Mi
 
-  # Enable Prometheus metrics
+  # Prometheus metrics (ServiceMonitor applied after kube-prometheus-stack is installed)
   prometheus:
     enabled: true
     servicemonitor:
-      enabled: true
-      prometheusInstance: default
-      targetPort: 9402
-      path: /metrics
-      interval: 60s
-      scrapeTimeout: 30s
-      labels:
-        prometheus: kube-prometheus
+      enabled: false
 
   # Global configuration
   global:

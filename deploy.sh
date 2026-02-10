@@ -18,6 +18,10 @@ helm dependency build "$SCRIPT_DIR/apps/cert-manager"
 helm upgrade --install cert-manager "$SCRIPT_DIR/apps/cert-manager" \
   -n cert-manager --create-namespace --wait
 
+# Apply ClusterIssuers (requires cert-manager CRDs to be ready)
+echo "=== Applying ClusterIssuers ==="
+kubectl apply -f "$SCRIPT_DIR/manifests/"
+
 # Wave 1: monitoring
 echo "=== Deploying kube-prometheus-stack ==="
 helm dependency build "$SCRIPT_DIR/apps/monitoring/kube-prometheus-stack"
