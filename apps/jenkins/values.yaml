@@ -1,8 +1,9 @@
 jenkins:
   controller:
     # Jenkins admin credentials (CHANGE THESE!)
-    adminUser: admin
-    adminPassword: changeme
+    admin:
+      username: admin
+      password: changeme
 
     # Jenkins configuration
     jenkinsUrl: "https://jenkins.homelab.local"
