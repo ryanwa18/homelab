@@ -1,0 +1,70 @@
+alloy:
+  alloy:
+    # Alloy configuration using River syntax
+    configMap:
+      create: true
+      content: |
+        // Receive OTLP traces from Jenkins and other services
+        otelcol.receiver.otlp "default" {
+          grpc {
+            endpoint = "0.0.0.0:4317"
+          }
+          http {
+            endpoint = "0.0.0.0:4318"
+          }
+
+          output {
+            traces  = [otelcol.processor.batch.default.input]
+          }
+        }
+
+        // Batch traces before exporting to reduce overhead
+        otelcol.processor.batch "default" {
+          timeout = "5s"
+          send_batch_size = 1024
+
+          output {
+            traces  = [otelcol.processor.attributes.default.input]
+          }
+        }
+
+        // Add resource attributes for identification
+        otelcol.processor.attributes "default" {
+          action {
+            key   = "cluster"
+            value = "homelab"
+            action = "upsert"
+          }
+
+          output {
+            traces  = [otelcol.exporter.otlp.tempo.input]
+          }
+        }
+
+        // Export traces to Tempo
+        otelcol.exporter.otlp "tempo" {
+          client {
+            endpoint = "tempo.observability.svc:4317"
+
+            tls {
+              insecure = true
+            }
+          }
+        }
+
+  # Resource limits
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 500m
+      memory: 256Mi
+
+  # Service configuration to expose OTLP endpoints
+  service:
+    type: ClusterIP
+
+  # Ingress not needed - internal only
+  ingress:
+    enabled: false

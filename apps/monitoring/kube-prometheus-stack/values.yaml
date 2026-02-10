@@ -64,7 +64,7 @@ kube-prometheus-stack:
           hosts:
             - grafana.homelab.local
 
-    # Pre-configure Prometheus datasource
+    # Pre-configure datasources
     datasources:
       datasources.yaml:
         apiVersion: 1
@@ -76,6 +76,147 @@ kube-prometheus-stack:
             access: proxy
             jsonData:
               timeInterval: 30s
+          - name: Tempo
+            type: tempo
+            url: http://tempo.observability.svc:3100
+            access: proxy
+            jsonData:
+              tracesToMetrics:
+                datasourceUid: prometheus
+              serviceMap:
+                datasourceUid: prometheus
+              nodeGraph:
+                enabled: true
+              tracesToLogsV2:
+                datasourceUid: ""
+
+    # Dashboard providers - auto-discover dashboards from ConfigMaps
+    dashboardProviders:
+      dashboardproviders.yaml:
+        apiVersion: 1
+        providers:
+          - name: jenkins
+            orgId: 1
+            folder: Jenkins
+            type: file
+            disableDeletion: false
+            editable: true
+            options:
+              path: /var/lib/grafana/dashboards/jenkins
+
+    # Dashboard definitions
+    dashboards:
+      jenkins:
+        jenkins-pipeline-traces:
+          json: |
+            {
+              "annotations": { "list": [] },
+              "description": "Jenkins Pipeline Monitoring - Trace bottlenecks with Tempo",
+              "editable": true,
+              "fiscalYearStartMonth": 0,
+              "graphTooltip": 0,
+              "id": null,
+              "links": [],
+              "panels": [
+                {
+                  "title": "Pipeline Traces",
+                  "type": "traces",
+                  "datasource": { "type": "tempo", "uid": "tempo" },
+                  "gridPos": { "h": 12, "w": 24, "x": 0, "y": 0 },
+                  "targets": [
+                    {
+                      "datasource": { "type": "tempo", "uid": "tempo" },
+                      "queryType": "traceqlSearch",
+                      "filters": [
+                        {
+                          "id": "service-name",
+                          "tag": "service.name",
+                          "operator": "=",
+                          "value": ["jenkins"],
+                          "scope": "resource"
+                        }
+                      ],
+                      "limit": 20
+                    }
+                  ]
+                },
+                {
+                  "title": "Pipeline Duration Over Time",
+                  "type": "timeseries",
+                  "datasource": { "type": "prometheus", "uid": "prometheus" },
+                  "gridPos": { "h": 8, "w": 12, "x": 0, "y": 12 },
+                  "targets": [
+                    {
+                      "expr": "jenkins_job_duration_milliseconds_summary{quantile=\"0.99\"}",
+                      "legendFormat": "{{ jenkins_job }} p99",
+                      "refId": "A"
+                    },
+                    {
+                      "expr": "jenkins_job_duration_milliseconds_summary{quantile=\"0.5\"}",
+                      "legendFormat": "{{ jenkins_job }} p50",
+                      "refId": "B"
+                    }
+                  ],
+                  "fieldConfig": {
+                    "defaults": {
+                      "unit": "ms",
+                      "custom": { "drawStyle": "line", "fillOpacity": 10 }
+                    }
+                  }
+                },
+                {
+                  "title": "Pipeline Success/Failure Rate",
+                  "type": "timeseries",
+                  "datasource": { "type": "prometheus", "uid": "prometheus" },
+                  "gridPos": { "h": 8, "w": 12, "x": 12, "y": 12 },
+                  "targets": [
+                    {
+                      "expr": "sum(rate(jenkins_runs_success_total[5m])) by (jenkins_job)",
+                      "legendFormat": "{{ jenkins_job }} success",
+                      "refId": "A"
+                    },
+                    {
+                      "expr": "sum(rate(jenkins_runs_failure_total[5m])) by (jenkins_job)",
+                      "legendFormat": "{{ jenkins_job }} failure",
+                      "refId": "B"
+                    }
+                  ],
+                  "fieldConfig": {
+                    "defaults": {
+                      "custom": { "drawStyle": "line", "fillOpacity": 10 }
+                    }
+                  }
+                },
+                {
+                  "title": "Node Graph - Pipeline Service Map",
+                  "type": "nodeGraph",
+                  "datasource": { "type": "tempo", "uid": "tempo" },
+                  "gridPos": { "h": 10, "w": 24, "x": 0, "y": 20 },
+                  "targets": [
+                    {
+                      "datasource": { "type": "tempo", "uid": "tempo" },
+                      "queryType": "traceqlSearch",
+                      "filters": [
+                        {
+                          "id": "service-name",
+                          "tag": "service.name",
+                          "operator": "=",
+                          "value": ["jenkins"],
+                          "scope": "resource"
+                        }
+                      ],
+                      "limit": 20
+                    }
+                  ]
+                }
+              ],
+              "schemaVersion": 39,
+              "tags": ["jenkins", "pipelines", "traces"],
+              "templating": { "list": [] },
+              "time": { "from": "now-6h", "to": "now" },
+              "title": "Jenkins Pipeline Traces",
+              "uid": "jenkins-pipeline-traces"
+            }
 
     # Resource limits
     resources:
