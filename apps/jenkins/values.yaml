@@ -67,10 +67,6 @@ jenkins:
       - blueocean:1.27.15
       - opentelemetry:794.v35ae9c04e3e0
 
-    # Additional plugins for Kubernetes integration
-    additionalPlugins:
-      - prometheus:787.v14b_5dd41a_1f5
-
   # Persistent storage for Jenkins home
   persistence:
     enabled: true
