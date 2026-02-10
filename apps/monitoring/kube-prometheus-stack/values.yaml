@@ -9,7 +9,7 @@ kube-prometheus-stack:
       storageSpec:
         volumeClaimTemplate:
           spec:
-            storageClassName: standard
+            storageClassName: local-path
             accessModes: ["ReadWriteOnce"]
             resources:
               requests:
@@ -46,7 +46,7 @@ kube-prometheus-stack:
     # Persistent storage for Grafana
     persistence:
       enabled: true
-      storageClassName: standard
+      storageClassName: local-path
       size: 10Gi
       accessModes:
         - ReadWriteOnce
@@ -233,7 +233,7 @@ kube-prometheus-stack:
       storage:
         volumeClaimTemplate:
           spec:
-            storageClassName: standard
+            storageClassName: local-path
             accessModes: ["ReadWriteOnce"]
             resources:
               requests:

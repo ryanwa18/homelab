@@ -71,7 +71,7 @@ jenkins:
   # Persistent storage for Jenkins home
   persistence:
     enabled: true
-    storageClass: standard
+    storageClass: local-path
     size: 50Gi
     accessMode: ReadWriteOnce
 
