@@ -95,7 +95,3 @@ jenkins:
       limits:
         cpu: 1000m
         memory: 1Gi
-
-  # Backup configuration (optional)
-  backup:
-    enabled: false
