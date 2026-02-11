@@ -64,6 +64,15 @@ alloy:
   # Service configuration to expose OTLP endpoints
   service:
     type: ClusterIP
+    extraPorts:
+      - name: otlp-grpc
+        port: 4317
+        targetPort: 4317
+        protocol: TCP
+      - name: otlp-http
+        port: 4318
+        targetPort: 4318
+        protocol: TCP
 
   # Ingress not needed - internal only
   ingress:
