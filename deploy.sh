@@ -50,10 +50,5 @@ helm dependency build "$SCRIPT_DIR/apps/observability/alloy"
 helm upgrade --install alloy "$SCRIPT_DIR/apps/observability/alloy" \
   -n observability --create-namespace --wait
 
-echo "=== Deploying OpenTelemetry Operator ==="
-helm dependency build "$SCRIPT_DIR/apps/observability/opentelemetry-operator"
-helm upgrade --install opentelemetry-operator "$SCRIPT_DIR/apps/observability/opentelemetry-operator" \
-  -n observability --create-namespace --wait
-
 echo "=== Deployment complete ==="
 helm list -A

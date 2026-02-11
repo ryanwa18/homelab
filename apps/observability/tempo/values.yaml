@@ -34,7 +34,7 @@ tempo:
   # Enable persistence for trace data
   persistence:
     enabled: true
-    storageClassName: standard
+    storageClassName: local-path
     accessModes:
       - ReadWriteOnce
     size: 10Gi

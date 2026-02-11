@@ -1,0 +1,12 @@
+# Vim swap files
+*.swp
+*.swo
+*.swn
+
+# Helm lock files and downloaded charts
+Chart.lock
+charts/
+*.tgz
+
+# Kubeconfig backups
+*.kubeconfig.bak

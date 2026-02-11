@@ -64,31 +64,21 @@ kube-prometheus-stack:
           hosts:
             - grafana.homelab.local
 
-    # Pre-configure datasources
-    datasources:
-      datasources.yaml:
-        apiVersion: 1
-        datasources:
-          - name: Prometheus
-            type: prometheus
-            url: http://kube-prometheus-stack-prometheus.monitoring.svc:9090
-            isDefault: true
-            access: proxy
-            jsonData:
-              timeInterval: 30s
-          - name: Tempo
-            type: tempo
-            url: http://tempo.observability.svc:3100
-            access: proxy
-            jsonData:
-              tracesToMetrics:
-                datasourceUid: prometheus
-              serviceMap:
-                datasourceUid: prometheus
-              nodeGraph:
-                enabled: true
-              tracesToLogsV2:
-                datasourceUid: ""
+    # Additional datasources (Prometheus is auto-configured by the chart)
+    additionalDataSources:
+      - name: Tempo
+        type: tempo
+        url: http://tempo.observability.svc:3100
+        access: proxy
+        jsonData:
+          tracesToMetrics:
+            datasourceUid: prometheus
+          serviceMap:
+            datasourceUid: prometheus
+          nodeGraph:
+            enabled: true
+          tracesToLogsV2:
+            datasourceUid: ""
 
     # Dashboard providers - auto-discover dashboards from ConfigMaps
     dashboardProviders:
